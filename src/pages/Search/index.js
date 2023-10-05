@@ -1,22 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../../services/Api";
 import ProductItem from "../../shared/components/product-items";
+import Pagination from "../../shared/components/Pagination";
 
 const Search = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-
     const keyword = searchParams.get("keyword");
-
     const [products, setProduct] = React.useState([]);
+    const page = searchParams.get("page") || 1;
+    const [pages, setPages] = React.useState({
+        limit: 12,
+    });
 
     React.useEffect(() => {
         getProducts({
             params: {
                 name: keyword,
+                limit: 12,
+                page: page,
             }
-        }).then(({ data }) => setProduct(data.data.docs));
-    }, [keyword])
+        }).then(({ data }) => {
+            setPages({ ...pages, ...data.data.pages });
+            setProduct(data.data.docs)
+        });
+    }, [keyword, pages])
     return (
         <>
             <div>
@@ -32,15 +40,7 @@ const Search = () => {
                     </div>
                 </div>
                 {/*	End List Product	*/}
-                <div id="pagination">
-                    <ul className="pagination">
-                        <li className="page-item"><a className="page-link" href="#">Trang trước</a></li>
-                        <li className="page-item active"><a className="page-link" href="#">1</a></li>
-                        <li className="page-item"><a className="page-link" href="#">2</a></li>
-                        <li className="page-item"><a className="page-link" href="#">3</a></li>
-                        <li className="page-item"><a className="page-link" href="#">Trang sau</a></li>
-                    </ul>
-                </div>
+                <Pagination pages={pages} />
             </div>
 
         </>

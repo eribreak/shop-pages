@@ -1,8 +1,11 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { createCommnetsProduct, getCommentByProduct, getProduct } from "../../services/Api";
 import { getImageProduct } from "../../shared/ultils";
 import { format } from "date-fns";
+import addToCart from "../../redux-setup/reducers/cart"
+import { useDispatch } from "react-redux";
+import { ADD_TO_CART } from "../../shared/constants/action-type";
 
 const ProductDetails = () => {
 
@@ -10,6 +13,27 @@ const ProductDetails = () => {
     const [product, setProduct] = React.useState("");
     const [commnet, setComment] = React.useState([]);
     const [inputComment, setInputComment] = React.useState([]);
+    const navigate = useNavigate();
+
+    const dispatch = useDispatch();
+    const addToCart = (type) => {
+        const { name, image, price } = product;
+        dispatch({
+            type: ADD_TO_CART,
+            payload: {
+                _id: id,
+                name,
+                image,
+                price,
+                qty: 1,
+            },
+        });
+        if(type === "buy-now") {
+            return navigate("/Cart");
+        }
+    }
+
+
 
     const fomatPrice = (price) => {
         const roundPrice = Math.ceil(price / 1000) * 1000;
@@ -66,7 +90,15 @@ const ProductDetails = () => {
                                 <li id="price-number"> {fomatPrice(product.price)} </li>
                                 <li id="status">{product.is_stock ? "Còn hàng" : "Hết hàng"}</li>
                             </ul>
-                            <div id="add-cart"><a href="#">Mua ngay</a></div>
+                            <div id="add-cart">
+                                <button onClick={() => addToCart("buy-now")} className="btn btn-warning mr-2">
+                                    Mua ngay
+                                </button>
+
+                                <button onClick={() => addToCart("add-to-cart")} className="btn btn-info">
+                                    Thêm vào giỏ hàng
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div id="product-body" className="row">
@@ -134,4 +166,5 @@ const ProductDetails = () => {
         </>
     )
 }
+
 export default ProductDetails;
